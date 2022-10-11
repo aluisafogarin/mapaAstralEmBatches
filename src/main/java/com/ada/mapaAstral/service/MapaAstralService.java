@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.DataFormatException;
 
 @Slf4j
@@ -39,7 +40,10 @@ public class MapaAstralService {
 
         List<MapaAstral> mapasAstrais = criarMapasAstrais(pessoas);
 
-        mapasAstrais.forEach(this::persistirMapaAstral);
+        mapasAstrais
+                .stream()
+                .parallel()
+                .forEach(this::persistirMapaAstral);
     }
 
     public OneOf<IllegalArgumentException, DataFormatException, IOException, MapaAstralCreatedResponse> lidaComArquivoEnviado(MultipartFile file) {
@@ -73,6 +77,7 @@ public class MapaAstralService {
     private List<MapaAstral> criarMapasAstrais(List<Pessoa> pessoas) {
 
         return pessoas.stream()
+                .parallel()
                 .map(this::montarMapaAstral)
                 .toList();
     }
@@ -95,6 +100,12 @@ public class MapaAstralService {
         var signo = getSigno(pessoa.getDataNascimento().toLocalDate());
         var ascendente = getAscendente(signo, pessoa.getDataNascimento().toLocalTime());
         var signoLunar = getSignoLunar(pessoa.getDataNascimento().toLocalTime(), pessoa.getZoneId().getId());
+
+        try {
+            TimeUnit.SECONDS.sleep(3);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return new MapaAstral(signo, ascendente, signoLunar, pessoa);
     }

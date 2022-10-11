@@ -17,6 +17,7 @@ public class MapaAstralApplication implements CommandLineRunner {
 	private final MapaAstralService mapaAstralService = new MapaAstralService(mapaAstralRepository, pessoaService);
 
 	public static void main(String[] args) {
+		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "5");
 		SpringApplication.run(MapaAstralApplication.class, args);
 	}
 
